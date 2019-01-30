@@ -45,7 +45,7 @@ MyBus.ID='66';
 MyBus.Arrival_time='00:00:00';
 MyBus.Departure_time='00:50:00';
 %---- SOC Variables ----% 
-MyBus.Arrival_SOC=11;
+MyBus.Arrival_SOC=15;
 MyBus.Departure_SOC=80;
 %---- Scheduling Variables ----% 
 MyBus.ChargingStart=0;
@@ -66,6 +66,6 @@ MyBus.Battery.VoltSoc_LookUp=VoltSoc_LookUp;
 MyBus.Battery.TempCorrection_LookUp=TempCorrection_LookUp;
 %---- Simulation ----%
 tic;
-dt=1 ;tunit='s';Pmax=150*10^3;withplot=1;
+dt=30 ;tunit='s';Pmax=70*10^3;withplot=1;
 MyBus.CalcP(dt,Pmax,withplot,tunit);
 toc;

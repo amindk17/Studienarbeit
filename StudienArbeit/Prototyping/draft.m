@@ -33,16 +33,29 @@ global TempCorrection_LookUp;
 TempCorrection_LookUp = [0.34 0.57 0.72 0.84 0.91 1.00 1.02 1.03;
                          -30  -20  -10  0    10   25   35   45  ];
                      
-                     
-function k = Return_K(Temperatur,LookUp)
-    T_vector = LookUp(2,:)';
-
-    if(( (Temperatur < -30) || (Temperatur>45) ))
-        msg = 'Cell Temperature out of Range in CorrectionLookUp';
+Imax = Return_Imax(-10,35,1,Imax_LookUp);
+Imax
+ 
+ %Function to return the internal resistance
+function Imax = Return_Imax(Temperatur,SoC,batNumCelPll,LookUp)
+    Soc_vector=LookUp(:,1);
+    T_vector = LookUp(1,:)';
+    Soc_vector(1,:)=[];
+    T_vector(1,:)=[];
+    LookUp(1,:) = [];
+    LookUp(:,1) = [];
+    LookUp=LookUp*batNumCelPll;
+    RestSoC= 100-SoC;
+    if(( Temperatur <= -40	) || ( Temperatur >= 85 ))
+        msg = 'Cell Temperature out of Range in Imax LookUp';
         error(msg)
     end
-    [~,  Tindex]=min(abs(T_vector-Temperatur));
-    k = LookUp(1,Tindex);
-end
-                     
-k = Return_K(-10,TempCorrection_LookUp)               
+    if( (RestSoC < 0) || (RestSoC>100) )
+        msg = 'Cell Capacitiy out of Range in Imax LookUp';
+        error(msg)
+    else
+        %Ri=interp2(T_vector,Soc_vector,LookUp',Temperatur,SoC)
+        Imax=interp2(Soc_vector,T_vector,LookUp',RestSoC,Temperatur);   
+    end
+end             
+            

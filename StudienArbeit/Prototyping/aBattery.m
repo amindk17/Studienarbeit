@@ -16,6 +16,7 @@ classdef aBattery  < handle
       Imax_LookUp;
       VoltSoc_LookUp;
       TempCorrection_LookUp;
+      Rc = 0.00736 ;
       %---- SimulationData ----% 
       simC;
       simI;
@@ -116,11 +117,10 @@ classdef aBattery  < handle
         %Function to calculate new SOC
         function [soc,It,P,finish] = calcNewSoc(obj,soc,endSoc,Cmax,T,dt,NumberOfCellsPll,NumberOfCellsSerie,Pmax,Ri_soc_LookUp,VoltSoc_LookUp,Imax_LookUp)
                     Ri = obj.Return_Ri(T,soc,Ri_soc_LookUp);
-                    Rc = 0.00736 ;% need to recheck
                     U0 = obj.Return_V(soc,VoltSoc_LookUp);
                     C0=(soc/100)*Cmax;
                     Imax = obj.Return_Imax(T,soc,NumberOfCellsPll,Imax_LookUp);
-                    It = obj.calcI(obj,soc,Cmax,Ri,Rc,NumberOfCellsSerie,NumberOfCellsPll,Pmax,dt,Imax,VoltSoc_LookUp);
+                    It = obj.calcI(obj,soc,Cmax,Ri,obj.Rc,NumberOfCellsSerie,NumberOfCellsPll,Pmax,dt,Imax,VoltSoc_LookUp);
                     P=-It*U0*NumberOfCellsPll*NumberOfCellsSerie;
                     if ((Pmax~=0)&(abs(P)>abs(Pmax)))
                         It=Pmax/(U0*NumberOfCellsPll*NumberOfCellsSerie);
@@ -148,7 +148,13 @@ classdef aBattery  < handle
             Rc=Rc*kr;
             U0 = obj.Return_V(SoC,VoltSoc_LookUp)*NSerie;
             tmpRC = Rc*(1-exp(-deltaT/(Rc*C)));
-            It = U0/(Ri+tmpRC)-sqrt( ( U0/(2*(Ri+tmpRC)) )^2 - (P/Ri));
+            term1= U0/(2*(Ri+tmpRC));
+            term2=(P/Ri);
+            if ( (term1)^2 > (P/Ri))
+                It = U0/(Ri+tmpRC)-sqrt( ( term1 )^2 - term2);
+            else
+                It = Imax;
+            end
             if (It>Imax)
                 It=Imax;
             elseif It<0
@@ -157,29 +163,27 @@ classdef aBattery  < handle
             end 
         end
 
-        %Function to return the Voltage depending on the SOC 
+        %Function to return the Voltage depending on the SOC in %
         function V = Return_V(soc,LookUp)
             soc_vector = LookUp(1,:)';
-
+            v_vector=LookUp(2,:)';
             if(( (soc < 0) || (soc>100) ))
                msg = 'Cell capacity out of Range in ReturnV';
                error(msg)
             end
-
-            [~,  Soc_index]=min(abs(soc_vector-soc/100));
-            V = LookUp(2,Soc_index);
-        end
+            V=interp1(soc_vector,v_vector,soc/100);
+         end
 
         %Function to return the Capacity correction factor
         function k = Return_K(Temperatur,LookUp)
             T_vector = LookUp(2,:)';
+            K_vector = LookUp(1,:)';
 
             if(( (Temperatur < -30) || (Temperatur>45) ))
                 msg = 'Cell Temperature out of Range in CorrectionLookUp';
                 error(msg)
             end
-            [~,  Tindex]=min(abs(T_vector-Temperatur));
-            k = LookUp(1,Tindex);
+            k=interp1(T_vector,K_vector,Temperatur);
         end
 
         %Function to return the max Charging Current
@@ -191,23 +195,17 @@ classdef aBattery  < handle
             LookUp(1,:) = [];
             LookUp(:,1) = [];
             LookUp=LookUp*batNumCelPll;
-            RestSoC= 100-SoC;%recheck
+            RestSoC= 100-SoC;
             if(( Temperatur <= -40	) || ( Temperatur >= 85 ))
                 msg = 'Cell Temperature out of Range in Imax LookUp';
                 error(msg)
             end
-
-            if( ( RestSoC <= 10 ) || ( RestSoC >= 90) )
-                msg = 'Cell Capacity out of Range  in Imax LookUp';
+            if( (RestSoC < 0) || (RestSoC>100) )
+                msg = 'Cell Capacitiy out of Range in Imax LookUp';
                 error(msg)
-            elseif (RestSoC>=15)
-                [~,  Tindex]=min(abs(T_vector-Temperatur));
-                [~, Socindex] = min(abs(Soc_vector-RestSoC));
-                Imax = LookUp(Socindex,Tindex);
             else
-                [~,  Tindex]=min(abs(T_vector-Temperatur));
-                [~, Socindex] = min(abs(Soc_vector-RestSoC));
-                Imax = LookUp(Socindex+1,Tindex);
+                %Ri=interp2(T_vector,Soc_vector,LookUp',Temperatur,SoC)
+                Imax=interp2(Soc_vector,T_vector,LookUp',RestSoC,Temperatur);   
             end
         end
 
@@ -227,10 +225,8 @@ classdef aBattery  < handle
             if( (SoC < 0) || (SoC>100) )
                 msg = 'Cell Capacity out of Range';
                 error(msg)
-            else 
-                [~,  Tindex]=min(abs(T_vector-Temperatur));
-                [~, Socindex] = min(abs(Soc_vector-SoC));
-                Ri = LookUp(Tindex,Socindex)/1000;
+            else
+                Ri=interp2(T_vector,Soc_vector,LookUp',Temperatur,SoC);
             end
         end
         
