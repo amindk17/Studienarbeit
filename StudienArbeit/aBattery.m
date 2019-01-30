@@ -1,11 +1,13 @@
-classdef aBattery < handle
+classdef aBattery  < handle
     %ABATTERY a Class to abstract a Battery
     %   Detailed explanation goes here
     
     properties
       %---- BatteryData ----%  
+      ID;
       Cmax;
       SOC;
+      endSOC;
       Temperatur;
       NumberOfCellsPll;
       NumberOfCellsSerie;
@@ -14,6 +16,7 @@ classdef aBattery < handle
       Imax_LookUp;
       VoltSoc_LookUp;
       TempCorrection_LookUp;
+      Rc = 0.00736 ;
       %---- SimulationData ----% 
       simC;
       simI;
@@ -23,20 +26,18 @@ classdef aBattery < handle
     methods
         %Function to return calculated vectors
         function [C,I,P] = simulateCharge(obj,dt,Pmax,withplot,tunit)
-        
-            
-
             k = obj.Return_K(obj.Temperatur,obj.TempCorrection_LookUp);
             i=1;
             obj.SOC = obj.SOC*k;
             obj.SOC*obj.Cmax/100;
+            soc=obj.SOC;
             C(i)=obj.SOC;
             I(i)=0;
             P(i) = 0;
             finish = false;
             while ~(finish)  
                 i=i+1;
-                [obj.SOC,Ic,Pw,finish] = obj.calcNewSoc(obj,obj.SOC,obj.Cmax,obj.Temperatur,dt,obj.NumberOfCellsPll,obj.NumberOfCellsSerie,...
+                [soc,Ic,Pw,finish] = obj.calcNewSoc(obj,soc,obj.endSOC,obj.Cmax,obj.Temperatur,dt,obj.NumberOfCellsPll,obj.NumberOfCellsSerie,...
                 Pmax,obj.Ri_soc_LookUp,obj.VoltSoc_LookUp,obj.Imax_LookUp);
                 
                 deltaQ = I*dt;
@@ -44,12 +45,14 @@ classdef aBattery < handle
                     msg ='too Large time Step dt !';
                     error(msg);
                 end
-                C(i)=obj.SOC;
+                C(i)=soc;
                 I(i)=Ic;
                 P(i) = Pw;
 
             end
-            
+            obj.simC=C;
+            obj.simI=I;
+            obj.simP=P;
             if(withplot)
                 [unit,un] = obj.ReturnUnit(tunit);
                 obj.generatePlot(C,obj.Cmax,I,P,Pmax,dt,unit,un);
@@ -57,135 +60,10 @@ classdef aBattery < handle
                
         
         end
-        
-    end
-    
-    methods(Static)    
-        %*****************************Help Functions*****************************%
-        %Function to calculate new SOC
-        function [soc,It,P,finish] = calcNewSoc(obj,soc,Cmax,T,dt,NumberOfCellsPll,NumberOfCellsSerie,Pmax,Ri_soc_LookUp,VoltSoc_LookUp,Imax_LookUp)
-                    Ri = obj.Return_Ri(T,soc,Ri_soc_LookUp);
-                    Rc = 0.00736 ;% need to recheck
-                    U0 = obj.Return_V(soc,VoltSoc_LookUp);
-                    C0=(soc/100)*Cmax;
-                    Imax = obj.Return_Imax(T,soc,NumberOfCellsPll,Imax_LookUp);
-                    It = obj.calcI(obj,soc,Cmax,Ri,Rc,NumberOfCellsSerie,NumberOfCellsPll,Pmax,dt,Imax,VoltSoc_LookUp);
-                    P=-It*U0*NumberOfCellsPll*NumberOfCellsSerie;
-                    if (abs(P)>abs(Pmax))
-                        It=Pmax/(U0*NumberOfCellsPll*NumberOfCellsSerie);
-                        P=-Pmax;
-                    end
-                    newSoC = (C0+It*dt)*100/Cmax;
-                    if(newSoC <= 90)
-                        soc = newSoC;
-                    end
-                    if   round(soc-90) >= 0 
-                        finish=true;
-                        disp('final SOC');
-                        disp(C0+It*dt);
-                    else
-                        finish = false;
-                    end
-
-
-                end
-
-        %Function to calculate Current Charge
-        function It = calcI(obj,SoC,C,Ri,Rc,NSerie,NPll,P,deltaT,Imax,VoltSoc_LookUp)
-            kr = NSerie/NPll;
-            Ri=Ri*kr;
-            Rc=Rc*kr;
-            U0 = obj.Return_V(SoC,VoltSoc_LookUp)*NSerie;
-            tmpRC = Rc*(1-exp(-deltaT/(Rc*C)));
-            It = U0/(Ri+tmpRC)-sqrt( ( U0/(2*(Ri+tmpRC)) )^2 - (P/Ri));
-            if (It>Imax)
-                It=Imax;
-            elseif It<0
-               msg = 'Too Small capacity ||  too Big Step ! => Very high instant current';
-               error(msg)
-            end 
-        end
-
-        %Function to return the Voltage depending on the SOC 
-        function V = Return_V(soc,LookUp)
-            soc_vector = LookUp(1,:)';
-
-            if(( (soc < 0) || (soc>100) ))
-               msg = 'Cell capacity out of Range in ReturnV';
-               error(msg)
-            end
-
-            [~,  Soc_index]=min(abs(soc_vector-soc/100));
-            V = LookUp(2,Soc_index);
-        end
-
-        %Function to return the Capacity correction factor
-        function k = Return_K(Temperatur,LookUp)
-            T_vector = LookUp(2,:)';
-
-            if(( (Temperatur < -30) || (Temperatur>45) ))
-                msg = 'Cell Temperature out of Range in CorrectionLookUp';
-                error(msg)
-            end
-            [~,  Tindex]=min(abs(T_vector-Temperatur));
-            k = LookUp(1,Tindex);
-        end
-
-        %Function to return the max Charging Current
-        function Imax = Return_Imax(Temperatur,SoC,batNumCelPll,LookUp)
-            Soc_vector=LookUp(:,1);
-            T_vector = LookUp(1,:)';
-            Soc_vector(1,:)=[];
-            T_vector(1,:)=[];
-            LookUp(1,:) = [];
-            LookUp(:,1) = [];
-            LookUp=LookUp*batNumCelPll;
-            RestSoC= 100-SoC;%recheck
-            if(( Temperatur <= -40	) || ( Temperatur >= 85 ))
-                msg = 'Cell Temperature out of Range in Imax LookUp';
-                error(msg)
-            end
-
-            if( ( RestSoC <= 10 ) || ( RestSoC >= 90) )
-                msg = 'Cell Capacity out of Range  in Imax LookUp';
-                error(msg)
-            elseif (RestSoC>=15)
-                [~,  Tindex]=min(abs(T_vector-Temperatur));
-                [~, Socindex] = min(abs(Soc_vector-RestSoC));
-                Imax = LookUp(Socindex,Tindex);
-            else
-                [~,  Tindex]=min(abs(T_vector-Temperatur));
-                [~, Socindex] = min(abs(Soc_vector-RestSoC));
-                Imax = LookUp(Socindex+1,Tindex);
-            end
-        end
-
-        %Function to return the internal resistance
-        function Ri = Return_Ri(Temperatur,SoC,LookUp)
-            Soc_vector=LookUp(1,:)';
-            T_vector = LookUp(:,1);
-            Soc_vector(1,:)=[];
-            T_vector(1,:)=[];
-            LookUp(1,:) = [];
-            LookUp(:,1) = [];
-            if((Temperatur < -10	) || (Temperatur>50))
-                msg = 'Cell Temperature out of Range';
-                error(msg)
-            end
-
-            if( (SoC < 0) || (SoC>100) )
-                msg = 'Cell Capacity out of Range';
-                error(msg)
-            else 
-                [~,  Tindex]=min(abs(T_vector-Temperatur));
-                [~, Socindex] = min(abs(Soc_vector-SoC));
-                Ri = LookUp(Tindex,Socindex)/1000;
-            end
-        end
-        
         %Function to generate some plots
-        function generatePlot(C,Cmaxx,I,P,Pmax,dt,unit,un)
-            figure('name',num2str(Pmax))
+        function generatePlot(obj,C,Cmaxx,I,P,Pmax,dt,unit,un)
+            name =strcat('Bus ',num2str(obj.ID));    
+            figure('name',name)
             [~,i]=size(C);
             %____________ Time 
             t= (0:dt:dt*(i-1));
@@ -230,6 +108,128 @@ classdef aBattery < handle
             refreshdata
             %ylim([110 210])
         end
+        
+        
+    end
+    
+    methods(Static)    
+        %*****************************Help Functions*****************************%
+        %Function to calculate new SOC
+        function [soc,It,P,finish] = calcNewSoc(obj,soc,endSoc,Cmax,T,dt,NumberOfCellsPll,NumberOfCellsSerie,Pmax,Ri_soc_LookUp,VoltSoc_LookUp,Imax_LookUp)
+                    Ri = obj.Return_Ri(T,soc,Ri_soc_LookUp);
+                    U0 = obj.Return_V(soc,VoltSoc_LookUp);
+                    C0=(soc/100)*Cmax;
+                    Imax = obj.Return_Imax(T,soc,NumberOfCellsPll,Imax_LookUp);
+                    It = obj.calcI(obj,soc,Cmax,Ri,obj.Rc,NumberOfCellsSerie,NumberOfCellsPll,Pmax,dt,Imax,VoltSoc_LookUp);
+                    P=-It*U0*NumberOfCellsPll*NumberOfCellsSerie;
+                    if ((Pmax~=0)&(abs(P)>abs(Pmax)))
+                        It=Pmax/(U0*NumberOfCellsPll*NumberOfCellsSerie);
+                        P=-Pmax;
+                    end
+                    newSoC = (C0+It*dt)*100/Cmax;
+                    if(newSoC <= 90)
+                        soc = newSoC;
+                    end
+                    if   round(soc-endSoc) >= 0 
+                        finish=true;
+                        %disp('final SOC');
+                        %disp(C0+It*dt);
+                    else
+                        finish = false;
+                    end
+
+
+                end
+
+        %Function to calculate Current Charge
+        function It = calcI(obj,SoC,C,Ri,Rc,NSerie,NPll,P,deltaT,Imax,VoltSoc_LookUp)
+            kr = NSerie/NPll;
+            Ri=Ri*kr;
+            Rc=Rc*kr;
+            U0 = obj.Return_V(SoC,VoltSoc_LookUp)*NSerie;
+            tmpRC = Rc*(1-exp(-deltaT/(Rc*C)));
+            term1= U0/(2*(Ri+tmpRC));
+            term2=(P/Ri);
+            if ( (term1)^2 > (P/Ri))
+                It = U0/(Ri+tmpRC)-sqrt( ( term1 )^2 - term2);
+            else
+                It = Imax;
+            end
+            if (It>Imax)
+                It=Imax;
+            elseif It<0
+               msg = 'Too Small capacity ||  too Big Step ! => Very high instant current';
+               error(msg)
+            end 
+        end
+
+        %Function to return the Voltage depending on the SOC in %
+        function V = Return_V(soc,LookUp)
+            soc_vector = LookUp(1,:)';
+            v_vector=LookUp(2,:)';
+            if(( (soc < 0) || (soc>100) ))
+               msg = 'Cell capacity out of Range in ReturnV';
+               error(msg)
+            end
+            V=interp1(soc_vector,v_vector,soc/100);
+         end
+
+        %Function to return the Capacity correction factor
+        function k = Return_K(Temperatur,LookUp)
+            T_vector = LookUp(2,:)';
+            K_vector = LookUp(1,:)';
+
+            if(( (Temperatur < -30) || (Temperatur>45) ))
+                msg = 'Cell Temperature out of Range in CorrectionLookUp';
+                error(msg)
+            end
+            k=interp1(T_vector,K_vector,Temperatur);
+        end
+
+        %Function to return the max Charging Current
+        function Imax = Return_Imax(Temperatur,SoC,batNumCelPll,LookUp)
+            Soc_vector=LookUp(:,1);
+            T_vector = LookUp(1,:)';
+            Soc_vector(1,:)=[];
+            T_vector(1,:)=[];
+            LookUp(1,:) = [];
+            LookUp(:,1) = [];
+            LookUp=LookUp*batNumCelPll;
+            RestSoC= 100-SoC;
+            if(( Temperatur <= -40	) || ( Temperatur >= 85 ))
+                msg = 'Cell Temperature out of Range in Imax LookUp';
+                error(msg)
+            end
+            if( (RestSoC < 0) || (RestSoC>100) )
+                msg = 'Cell Capacitiy out of Range in Imax LookUp';
+                error(msg)
+            else
+                %Ri=interp2(T_vector,Soc_vector,LookUp',Temperatur,SoC)
+                Imax=interp2(Soc_vector,T_vector,LookUp',RestSoC,Temperatur);   
+            end
+        end
+
+        %Function to return the internal resistance
+        function Ri = Return_Ri(Temperatur,SoC,LookUp)
+            Soc_vector=LookUp(1,:)';
+            T_vector = LookUp(:,1);
+            Soc_vector(1,:)=[];
+            T_vector(1,:)=[];
+            LookUp(1,:) = [];
+            LookUp(:,1) = [];
+            if((Temperatur < -10	) || (Temperatur>50))
+                msg = 'Cell Temperature out of Range';
+                error(msg)
+            end
+
+            if( (SoC < 0) || (SoC>100) )
+                msg = 'Cell Capacity out of Range';
+                error(msg)
+            else
+                Ri=interp2(T_vector,Soc_vector,LookUp',Temperatur,SoC);
+            end
+        end
+        
         
         %Function to convert time units
         function [unit,un]=ReturnUnit(tunit)
