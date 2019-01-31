@@ -15,7 +15,11 @@ SimulationMatrix=zeros(sz+2,dtm);
         for j=1:m
             %t0=BusArray(i-1).ChargingStart;
             t0=round(t0_list(i-1));
-            SimulationMatrix(i,j+t0*dt)=BusArray(i-1).ChargeVector(j);
+            SimulationMatrix(i,j+t0)=BusArray(i-1).ChargeVector(j);
+            if(j+t0)>dtm
+                 msg ='too Large start vector t0 !';
+                 error(msg);
+            end    
         end
     end
     

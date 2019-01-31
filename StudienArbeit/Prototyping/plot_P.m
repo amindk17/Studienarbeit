@@ -1,4 +1,4 @@
-function plot_P(Bm,timeformat)
+function plot_P(Bm,WorstCase,timeformat)
     [n,sz]=size(Bm);
     if(~timeformat)
        t=Bm(1,:)/3600;
@@ -31,13 +31,26 @@ function plot_P(Bm,timeformat)
     xlabel('Time in h');
     ylabel('Pwer in kW');
     subplot(2,1,2);
-    maxy=max(Bm(n,:));
-    maxy=maxy*1.1;
+    maxy=WorstCase*1.1;
     ylim([0 maxy]);
     plot(t,Bm(n,:)/1000);
+    hold on
+    Pworst = ones(size(t))*WorstCase;
+    plot(t,Pworst/1000);
+    diff= (Pworst-max(Bm(n,:)));
+    %for i=1:sz
+    %    if(Bm(n,i)==0)
+    %        diff(1,i)=0;
+    %    end
+    %end
+    plot(t,diff/1000);
     title('P ges');
-    Legend{1}='P_g_e_s';
+    Legend2{1}='P_g_e_s';
+    Legend2{2}='P_w_o_r_s_t';
+    Legend2{3}='P_d_i_f_f';
+    legend(Legend2);
     xlabel('Time in h');
     ylabel('Pwer in kW');
+    hold off
 end
 

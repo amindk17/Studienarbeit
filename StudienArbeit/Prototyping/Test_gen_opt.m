@@ -1,5 +1,5 @@
-clc;clear;
-tic;
+%clc;clear;
+
 %*****************************Cells Data*****************************%
 % Innenwiderstand einer Zelle in mOhm  x-> Soc | y -> T
 global Ri_soc_LookUp;
@@ -39,23 +39,25 @@ TempCorrection_LookUp = [0.34 0.57 0.72 0.84 0.91 1.00 1.02 1.03;
 
 %*****************************Generate Test Data*****************************%
 global BusArray;
+dt=30;
 BusArray=randomFill(4);
-BusArray(1).CalcP(1,5000,-6,'s');
-BusArray(2).CalcP(1,15000,0,'s');
-BusArray(3).CalcP(1,25000,0,'s');
-BusArray(4).CalcP(1,10000,0,'s');
+BusArray(1).CalcP(dt,5000,0,'s');
+BusArray(2).CalcP(dt,15000,0,'s');
+BusArray(3).CalcP(dt,25000,0,'s');
+BusArray(4).CalcP(dt,10000,0,'s');
 x0=[1500,2500,3000,4500];
-
+x1=[0,0,0,0];
 %*****************************Run Optimiser*****************************%
 %------------------------------------------%
-global dt;
-dt=1;
+
+
 tic;
-[Bm,Pges_max]=FillBigMatrix(BusArray,1,x0); 
+[Bm,~]=FillBigMatrix(BusArray,dt,x1);
+wC=CalcWorstCase(BusArray); 
 [~,sizeBigM ] = size(Bm);
 opt_t0 = Optimise_t0(@calcP,BusArray,sizeBigM);
-[Bm,Pges_max]=FillBigMatrix(BusArray,1,opt_t0);
-plot_P(Bm,1);
+[Bm,Pges_max]=FillBigMatrix(BusArray,dt,opt_t0);
+plot_P(Bm,wC,1);
 toc;
 %------------------------------------------%
 

@@ -21,6 +21,7 @@ classdef aBattery  < handle
       simC;
       simI;
       simP;
+      Pmax;
     end
         
     methods
@@ -45,14 +46,14 @@ classdef aBattery  < handle
                     msg ='too Large time Step dt !';
                     error(msg);
                 end
-                C(i)=soc;
-                I(i)=Ic;
+                C(i) = soc;
+                I(i) = Ic;
                 P(i) = Pw;
-
             end
             obj.simC=C;
             obj.simI=I;
             obj.simP=P;
+            obj.Pmax = max(abs(P));
             if(withplot)
                 [unit,un] = obj.ReturnUnit(tunit);
                 obj.generatePlot(C,obj.Cmax,I,P,Pmax,dt,unit,un);
