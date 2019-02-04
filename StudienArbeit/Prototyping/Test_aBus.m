@@ -67,5 +67,6 @@ MyBus.Battery.TempCorrection_LookUp=TempCorrection_LookUp;
 %---- Simulation ----%
 tic;
 dt=30 ;tunit='s';Pmax=70*10^3;withplot=1;
+
 MyBus.CalcP(dt,Pmax,withplot,tunit);
 toc;

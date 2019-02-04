@@ -39,7 +39,7 @@ TempCorrection_LookUp = [0.34 0.57 0.72 0.84 0.91 1.00 1.02 1.03;
 
 %*****************************Generate Test Data*****************************%
 global BusArray;
-dt=30;
+dt=20;
 BusArray=randomFill(4);
 BusArray(1).CalcP(dt,5000,0,'s');
 BusArray(2).CalcP(dt,15000,0,'s');
