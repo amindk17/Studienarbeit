@@ -39,14 +39,15 @@ TempCorrection_LookUp = [0.34 0.57 0.72 0.84 0.91 1.00 1.02 1.03;
 
 %*****************************Generate Test Data*****************************%
 global BusArray;
-dt=20;
-BusArray=randomFill(4);
-BusArray(1).CalcP(dt,5000,0,'s');
-BusArray(2).CalcP(dt,15000,0,'s');
-BusArray(3).CalcP(dt,25000,0,'s');
-BusArray(4).CalcP(dt,10000,0,'s');
+nr_bus = 20;
+dt=30;
+x1=zeros(nr_bus,1)';
+BusArray=randomFill(nr_bus);
+for i=1:nr_bus
+   BusArray(i).CalcP(dt,10000,0,'s'); 
+end
 x0=[1500,2500,3000,4500];
-x1=[0,0,0,0];
+
 %*****************************Run Optimiser*****************************%
 %------------------------------------------%
 

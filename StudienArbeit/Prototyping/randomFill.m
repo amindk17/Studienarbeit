@@ -15,12 +15,12 @@ function BusArray=randomFill(numberOfBus)
         %---- BatteryData ----% 
         BusArray(i).Battery = aBattery();
         BusArray(i).Battery.ID=BusArray(i).ID;
-        BusArray(i).Battery.Cmax=randi([10*10^3 100*10^3],1);
+        BusArray(i).Battery.Cmax=randi([50*10^3 100*10^3],1);
         BusArray(i).Battery.SOC=BusArray(i).Arrival_SOC;
         BusArray(i).Battery.endSOC=BusArray(i).Departure_SOC;
         BusArray(i).Battery.Temperatur=25;%randi([0 45],1);
         BusArray(i).Battery.NumberOfCellsPll=randi([1 4],1);
-        BusArray(i).Battery.NumberOfCellsSerie=randi([10 100],1);
+        BusArray(i).Battery.NumberOfCellsSerie=randi([50 100],1);
         %---- LookUps ----%
         BusArray(i).Battery.Ri_soc_LookUp=Ri_soc_LookUp;
         BusArray(i).Battery.Imax_LookUp=Imax_LookUp;

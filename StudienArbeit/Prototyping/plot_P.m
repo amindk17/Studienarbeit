@@ -11,7 +11,7 @@ function plot_P(Bm,WorstCase,timeformat)
     figure('name','P');
     subplot(2,1,1);
     maxy=max(Bm(n,:));
-    maxy=maxy*1.1;
+    maxy=maxy*1.2;
     ylim([0 maxy]);
     plot(t,Bm(n,:)/1000);
     hold on;
@@ -23,7 +23,7 @@ function plot_P(Bm,WorstCase,timeformat)
     end
     Legend{1}='P_g_e_s';
     for i=2:n-1
-       Legend{i}=strcat('P_B_u_s_', num2str(i-1));
+       Legend{i}=strcat('P_B_u_s_{', num2str(i-1),'}');
     end
     hold off
     legend(Legend);
