@@ -1,9 +1,10 @@
 function BusArray=randomFill(numberOfBus)
     global Ri_soc_LookUp Imax_LookUp VoltSoc_LookUp TempCorrection_LookUp ;
+    ids = randperm(100,numberOfBus);
     for i=1:numberOfBus
         BusArray(i)=aBus();
         %--- Bus Data ---%
-        BusArray(i).ID=num2str(randi([1 100],1));
+        BusArray(i).ID=ids(i);%num2str(randi([1 100],1));
         BusArray(i).Arrival_time=returnRandomTime(0,2);
         BusArray(i).Departure_time=returnRandomTime(4,6);
         %---- SOC Variables ----% 

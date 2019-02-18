@@ -1,10 +1,12 @@
-function opt_t0 = Optimise_t0(calcP,BusArray,sizeBigM)
+function opt_t0 = Optimise_t0(calcP,BusArray,dt,arrTime)
     [~, m] = size(BusArray);
     LB=zeros(1,m);
     UB=zeros(1,m);
     for i=1:m
-        [~,a]=size(BusArray(i).ChargeVector);
-        UB(1,i)=sizeBigM-a-1;
+        bussArrTime=datetime(BusArray(i).Arrival_time,'InputFormat','HH:mm:SS');
+        bussDepTime=datetime(BusArray(i).Departure_time,'InputFormat','HH:mm:SS');
+        LB(1,i) =int32(fix(etime(datevec(bussArrTime),datevec(arrTime))/dt));
+        UB(1,i) =int32(fix(etime(datevec(bussDepTime),datevec(arrTime))/dt))-BusArray(i).ChargingTime/dt;
     end  
     nvars=m;
     %LB=[0 0 0];

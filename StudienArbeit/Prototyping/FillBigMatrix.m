@@ -1,6 +1,6 @@
-function [SimulationMatrix,Pges_max] = FillBigMatrix(BusArray,dt,t0_list)
+function [SimulationMatrix,Pges_max] = FillBigMatrix(BusArray,dt,worstCase)
 arrtime=datetime('00:00:00','InputFormat','HH:mm:SS');
-deptime=datetime('06:00:00','InputFormat','HH:mm:SS');
+deptime=datetime('07:00:00','InputFormat','HH:mm:SS');
 timediff =etime(datevec(deptime),datevec(arrtime));
 dtm=fix(timediff/dt)+1;
 [~,sz] =size(BusArray);
@@ -14,11 +14,21 @@ SimulationMatrix=zeros(sz+2,dtm);
         [~,m]=size(BusArray(i-1).ChargeVector);
         for j=1:m
             %t0=BusArray(i-1).ChargingStart;
-            t0=round(t0_list(i-1));
+            %t0=round(t0_list(i-1));
+            if worstCase
+              Bustime =  BusArray(i-1).Arrival_time;
+              bussArrTime=datetime(Bustime,'InputFormat','HH:mm:SS');
+              t0 =fix(etime(datevec(bussArrTime),datevec(arrtime))/dt);
+            else
+              t0 = BusArray(i-1).ChargingStart;
+            end
             SimulationMatrix(i,j+t0)=BusArray(i-1).ChargeVector(j);
             if(j+t0)>dtm
                  msg ='too Large start vector t0 !';
+                 %warning(msg);
                  error(msg);
+                 %Pges_max=Inf;
+                 
             end    
         end
     end

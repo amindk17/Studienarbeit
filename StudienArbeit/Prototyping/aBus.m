@@ -29,7 +29,7 @@ classdef aBus < handle
         end
         %Function to generate some plots
          function CalcP(obj,dt,Pmax,withplot,tunit)
-            [~,~,obj.ChargeVector] =obj.Battery.simulateCharge(dt,Pmax,withplot,tunit);
+            [~,~,obj.ChargeVector,obj.ChargingTime] = obj.Battery.simulateCharge(dt,Pmax,withplot,tunit);
             obj.ChargeVector=-obj.ChargeVector;
          end
     end

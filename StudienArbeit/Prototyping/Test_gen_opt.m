@@ -1,4 +1,4 @@
-%clc;clear;
+clc;clear;
 
 %*****************************Cells Data*****************************%
 % Innenwiderstand einer Zelle in mOhm  x-> Soc | y -> T
@@ -39,8 +39,8 @@ TempCorrection_LookUp = [0.34 0.57 0.72 0.84 0.91 1.00 1.02 1.03;
 
 %*****************************Generate Test Data*****************************%
 global BusArray;
-nr_bus = 20;
-dt=30;
+nr_bus = 10;
+dt=60;
 x1=zeros(nr_bus,1)';
 BusArray=randomFill(nr_bus);
 for i=1:nr_bus
@@ -50,18 +50,23 @@ x0=[1500,2500,3000,4500];
 
 %*****************************Run Optimiser*****************************%
 %------------------------------------------%
-
-
-tic;
-[Bm,~]=FillBigMatrix(BusArray,dt,x1);
-wC=CalcWorstCase(BusArray); 
+[Bm,~]=FillBigMatrix(BusArray,dt,1);
+wC=CalcWorstCase(Bm); 
 [~,sizeBigM ] = size(Bm);
-opt_t0 = Optimise_t0(@calcP,BusArray,sizeBigM);
-[Bm,Pges_max]=FillBigMatrix(BusArray,dt,opt_t0);
 plot_P(Bm,wC,1);
+newBarplot(BusArray,dt)
+% Optimisation
+global goal;
+goal = 'Pmin';
+arrtime=datetime('00:00:00','InputFormat','HH:mm:SS');
+deptime=datetime('06:00:00','InputFormat','HH:mm:SS');
+tic;
+opt_t0 = Optimise_t0(@Opt_function,BusArray,dt,arrtime);
 toc;
+[Bm,Pges_max]=FillBigMatrix(BusArray,dt,0);
+plot_P(Bm,wC,1);
+newBarplot(BusArray,dt)
 %------------------------------------------%
-
 
 
 
