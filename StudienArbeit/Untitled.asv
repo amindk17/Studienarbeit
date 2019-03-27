@@ -1,0 +1,4 @@
+for i=1:nr_bus
+    start=opt_t0(i)*dt;
+    BusArray(i).ChargingStart
+end    
