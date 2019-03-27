@@ -21,15 +21,15 @@ classdef aBattery  < handle
       simC;
       simI;
       simP;
+      Pmax;
     end
         
     methods
         %Function to return calculated vectors
-        function [C,I,P] = simulateCharge(obj,dt,Pmax,withplot,tunit)
+        function [C,I,P,T] = simulateCharge(obj,dt,Pmax,withplot,tunit)
             k = obj.Return_K(obj.Temperatur,obj.TempCorrection_LookUp);
             i=1;
             obj.SOC = obj.SOC*k;
-            obj.SOC*obj.Cmax/100;
             soc=obj.SOC;
             C(i)=obj.SOC;
             I(i)=0;
@@ -37,24 +37,29 @@ classdef aBattery  < handle
             finish = false;
             while ~(finish)  
                 i=i+1;
+                %disp(i)
+                if i==10^3
+                    msg ='too small time Step dt !';
+                    error(msg);
+                end
                 [soc,Ic,Pw,finish] = obj.calcNewSoc(obj,soc,obj.endSOC,obj.Cmax,obj.Temperatur,dt,obj.NumberOfCellsPll,obj.NumberOfCellsSerie,...
-                Pmax,obj.Ri_soc_LookUp,obj.VoltSoc_LookUp,obj.Imax_LookUp);
-                
+                Pmax,obj.Ri_soc_LookUp,obj.VoltSoc_LookUp,obj.Imax_LookUp); 
                 deltaQ = I*dt;
                 if( logical(exist('deltaQ','var') == 1 ) & (deltaQ > obj.Cmax) )
                     msg ='too Large time Step dt !';
                     error(msg);
                 end
-                C(i)=soc;
-                I(i)=Ic;
+                C(i) = soc;
+                I(i) = Ic;
                 P(i) = Pw;
-
             end
+            [unit,un] = obj.ReturnUnit(tunit);
+            T=i*dt/unit;
             obj.simC=C;
             obj.simI=I;
             obj.simP=P;
+            obj.Pmax = max(abs(P));
             if(withplot)
-                [unit,un] = obj.ReturnUnit(tunit);
                 obj.generatePlot(C,obj.Cmax,I,P,Pmax,dt,unit,un);
             end
                
