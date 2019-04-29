@@ -52,7 +52,9 @@ function plot_P(Bm,WorstCase,timeformat)
     %Legend2{3}='P_d_i_f_f';
     legend(Legend2);
     xlabel('Time in h');
-    ylabel('Pwer in kW');
+    ylabel('Power in kW');
+    grid on
     hold off
+    
 end
 

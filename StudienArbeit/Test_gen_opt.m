@@ -1,4 +1,4 @@
-clc;clear;
+clc;clear all;
 clear
 %*****************************Cells Data*****************************%
 % Innenwiderstand einer Zelle in mOhm  x-> Soc | y -> T
@@ -41,8 +41,8 @@ TempCorrection_LookUp = [0.34 0.57 0.72 0.84 0.91 1.00 1.02 1.03;
 global BusArray;
 global iteration dt;
 iteration=0;
-nr_bus = 10;
-dt=100;
+nr_bus = 100;
+dt=50;
 x1=zeros(nr_bus,1)';
 tic
 BusArray=randomFill(nr_bus,45*10^3);
@@ -64,7 +64,7 @@ wC=CalcWorstCase(Bm);
 [~,sizeBigM ] = size(Bm);
 global goal;
 goal = 'Pmin';
-
+%newBarplot(BusArray,1,Bm)
 tic;
 opt_t0 = Optimise_t0(@Opt_function,BusArray,dt,arrtime);
 toc;
@@ -73,14 +73,12 @@ plot_P(Bm,wC,1);
 for i=1:nr_bus
      BusArray(i).ChargingStart=double(opt_t0(i)*dt);
 end  
+
+%Save the list
 newBarplot(BusArray,1,Bm)
+name = strcat('BusList',int2str(nr_bus),'.mat');
+save(name, 'BusArray');
 %------------------------------------------%
 
-%for i=1:nr_bus
-%    arrArray(i)=arrtime;
-%end
-
-%Start_charge(:,3)=arrArray+seconds(opt_t0*dt);
-
-
-
+[Energie_stored,Energie_grid] = CalC_Energie(BusArray(9),0.94,VoltSoc_LookUp)
+Bus = BusArray(9)

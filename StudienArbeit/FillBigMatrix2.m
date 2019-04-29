@@ -28,8 +28,8 @@ SimulationMatrix=zeros(sz+2,dtm);
                  %warning(msg);
 %                  disp(i)
 %                  error(msg);
-                 Nmax=10^8;
-                 Pges_max=10^8;
+                 Nmax=NaN;
+                 Pges_max=NaN;
                  return       
             end    
         end

@@ -5,7 +5,6 @@ timediff =etime(datevec(deptime),datevec(arrtime));
 dtm=fix(timediff/dt)+1;
 [~,sz] =size(BusArray);
 SimulationMatrix=zeros(sz+2,dtm);
-
     for i = 2:sz+1
         if(isempty(BusArray(i-1).ChargeVector))
             txt='some Bus is not simulated';
@@ -13,8 +12,6 @@ SimulationMatrix=zeros(sz+2,dtm);
         end
         [~,m]=size(BusArray(i-1).ChargeVector);
         for j=1:m
-            %t0=BusArray(i-1).ChargingStart;
-            %t0=round(t0_list(i-1));
             if worstCase
               Bustime =  BusArray(i-1).Arrival_time;
               bussArrTime=datetime(Bustime,'InputFormat','HH:mm:SS');
@@ -27,8 +24,7 @@ SimulationMatrix=zeros(sz+2,dtm);
                  msg ='not enough t0! Some aBus can not be Charged!';
                  error(msg);      
             end    
-        end
-        
+        end       
     end
     
     for i = 1:dtm
@@ -40,8 +36,7 @@ SimulationMatrix=zeros(sz+2,dtm);
                 used_chargers=used_chargers+1;
             end
         end
-        SimulationMatrix(sz+3,i)=used_chargers;
-            
+        SimulationMatrix(sz+3,i)=used_chargers;           
     end
     
     SimulationMatrix(1,:)=(0:dt:timediff);

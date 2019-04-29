@@ -1,4 +1,4 @@
-clc;clear;
+clc;clear all;
 clear
 %*****************************Cells Data*****************************%
 % Innenwiderstand einer Zelle in mOhm  x-> Soc | y -> T
@@ -38,52 +38,61 @@ TempCorrection_LookUp = [0.34 0.57 0.72 0.84 0.91 1.00 1.02 1.03;
                          -30  -20  -10  0    10   25   35   45  ];
 
 %*****************************Generate Test Data*****************************%
-global BusArray;
+global BusArrayP;
 global iteration dt;
+global goal;
+
+goal = 'Pmin';
 iteration=0;
-nr_bus = 3;
-dt=100;
+nr_bus = 10;
+dt=50;
 x1=zeros(nr_bus,1)';
 tic
-BusArray=randomFill(nr_bus,45*10^3);
+BusArrayP=randomFill(nr_bus,45*10^3);
 toc
 arrtime=datetime('00:00:00','InputFormat','HH:mm:SS');
 deptime=datetime('06:00:00','InputFormat','HH:mm:SS');
 for i=1:nr_bus
-   %BusArray(i).CalcP(dt,45000,0,'s');
-   start_time=abs(etime(datevec(arrtime),datevec(BusArray(i).Arrival_time)));
-   BusArray(i).ChargingStart=start_time;
-   BusArray(i).Arrival_seconds = start_time;
-   BusArray(i).Pmax = 45*10^3;
-   
+   start_time=abs(etime(datevec(arrtime),datevec(BusArrayP(i).Arrival_time)));
+   BusArrayP(i).ChargingStart=start_time;
+   BusArrayP(i).Arrival_seconds = start_time;
+   all_time = abs(etime(datevec(BusArrayP(i).Arrival_time),datevec(BusArrayP(i).Departure_time)));
+   all_time = round(all_time);
+   [Energie_stored, Energie_grid] = CalC_Energie(BusArrayP(i),0.96,VoltSoc_LookUp);
+   Pm = (Energie_grid*1000*3600)/(all_time) ;
+   BusArrayP(i).Pmin=Pm;
 end
+
 
 
 %*****************************Run Optimiser*****************************%
 %------------------------------------------%
-[Bm,~,~]=FillBigMatrix2(BusArray,dt,1);
+[Bm,P,~]=FillBigMatrix(BusArrayP,dt,1);
+P
 wC=CalcWorstCase(Bm); 
 [~,sizeBigM ] = size(Bm);
-global goal;
-goal = 'Pmin';
+
+
+
+
 
 tic;
 opt_p = Optimise_P0(@Opt_function_P);
 toc;
-[Bm,Pges_max,Nmax]=FillBigMatrix2(BusArray,dt,0);
+
+
 
 for i=1:nr_bus
-     BusArray(i).CalcP(dt,opt_p(i),0,'s');
+     BusArrayP(i).CalcP(dt,opt_p(i),0,'s');
 end  
+[Bm,Pges_max,Nmax]=FillBigMatrix(BusArrayP,dt,1);
+Pges_max
 plot_P(Bm,wC,1);
-newBarplot(BusArray,1,Bm)
+newBarplot(BusArrayP,1,Bm)
 %------------------------------------------%
 
-%for i=1:nr_bus
-%    arrArray(i)=arrtime;
-%end
 
-%Start_charge(:,3)=arrArray+seconds(opt_t0*dt);
+
 
 
 

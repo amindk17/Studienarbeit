@@ -1,4 +1,4 @@
-clc;clear;
+clc;clear all;
 tic;
 %*****************************Cells Data*****************************%
 % Innenwiderstand einer Zelle in mOhm  x-> Soc | y -> T

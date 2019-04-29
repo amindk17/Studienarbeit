@@ -38,7 +38,7 @@ classdef aBattery  < handle
             while ~(finish)  
                 i=i+1;
                 %disp(i)
-                if i==10^3
+                if i==10^5
                     msg ='too small time Step dt !';
                     error(msg);
                 end
@@ -126,9 +126,9 @@ classdef aBattery  < handle
                     C0=(soc/100)*Cmax;
                     Imax = obj.Return_Imax(T,soc,NumberOfCellsPll,Imax_LookUp);
                     It = obj.calcI(obj,soc,Cmax,Ri,obj.Rc,NumberOfCellsSerie,NumberOfCellsPll,Pmax,dt,Imax,VoltSoc_LookUp);
-                    P=-It*U0*NumberOfCellsPll*NumberOfCellsSerie;
+                    P=-It*U0*NumberOfCellsSerie;
                     if ((Pmax~=0)&(abs(P)>abs(Pmax)))
-                        It=Pmax/(U0*NumberOfCellsPll*NumberOfCellsSerie);
+                        It=Pmax/(U0*NumberOfCellsSerie);
                         P=-Pmax;
                     end
                     newSoC = (C0+It*dt)*100/Cmax;
@@ -231,7 +231,7 @@ classdef aBattery  < handle
                 msg = 'Cell Capacity out of Range';
                 error(msg)
             else
-                Ri=interp2(T_vector,Soc_vector,LookUp',Temperatur,SoC);
+                Ri=interp2(T_vector,Soc_vector,LookUp',Temperatur,SoC)/1000;
             end
         end
         

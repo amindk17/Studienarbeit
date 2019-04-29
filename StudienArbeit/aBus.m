@@ -18,6 +18,7 @@ classdef aBus < handle
         ChargingStart=0;
         ChargingTime=0;
         Pmax=0;
+        Pmin=0;
         Priority=0;
     end
     
@@ -27,6 +28,7 @@ classdef aBus < handle
             [~,~,obj.ChargeVector,obj.ChargingTime] = obj.Battery.simulateCharge(dt,Pmax,withplot,tunit);
             obj.ChargeVector=-obj.ChargeVector;
          end
+  
     end
 end
     
