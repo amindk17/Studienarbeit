@@ -1,4 +1,4 @@
-function newBarplot(BusArray,tunit,BM)
+function newBarplot2(BusArray,tunit,BMnew,BMold)
 % Correct the time according to used unit
 if tunit==1%seconds
     correct = 3600;
@@ -75,8 +75,9 @@ hold off
 % plot number of chargers
 hold on
 yyaxis right
-plot(BM(1,:)/correct,BM(nr_bus+3,:))
+plot(BMold(1,:)/correct,BMold(nr_bus+3,:))
+plot(BMnew(1,:)/correct,BMnew(nr_bus+3,:))
 hold off
 % Add legend
-legend({'','after Optimisation','','before Optimisation','Number Of Chargers after Optimisation'});
+legend({'','after Optimisation','','before Optimisation','Number Of Chargers before','Number Of Chargers after'});
 end

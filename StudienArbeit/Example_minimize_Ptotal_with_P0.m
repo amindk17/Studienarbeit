@@ -1,4 +1,5 @@
-clc;clear all;
+clc;
+clear all;
 clear
 %*****************************Cells Data*****************************%
 % Innenwiderstand einer Zelle in mOhm  x-> Soc | y -> T
@@ -38,31 +39,27 @@ TempCorrection_LookUp = [0.34 0.57 0.72 0.84 0.91 1.00 1.02 1.03;
                          -30  -20  -10  0    10   25   35   45  ];
 
 %*****************************Generate Test Data*****************************%
-global BusArray;
+global BusArrayP;
 global iteration dt;
 iteration=0;
 nr_bus = 10;
 dt=250;
 
-tic
-BusArray = randomFill(nr_bus,45*10^3);
-toc
 arrtime=datetime('00:00:00','InputFormat','HH:mm:SS');
 deptime=datetime('06:00:00','InputFormat','HH:mm:SS');
-for i=1:nr_bus
-   %BusArray(i).CalcP(dt,45000,0,'s');
-   start_time=abs(etime(datevec(arrtime),datevec(BusArray(i).Arrival_time)));
-   BusArray(i).ChargingStart=start_time;
-   BusArray(i).Arrival_seconds = start_time;
-end
+
+tic
+BusArrayP = randomFill(nr_bus,45*10^3, arrtime,deptime);
+toc
+
 
 
 %*****************************Run Optimiser*****************************%
 tic;
-[success] = minimize_nChargers(BusArray,1,arrtime,deptime,1);
-toc
+[success] = minimize_total_Power_with_P(BusArrayP,42,arrtime,deptime,1);
+toc;
 if success 
-    disp("successfull")
+    disp("successfull");
 else
-    disp("failed")
+    disp("failed");
 end

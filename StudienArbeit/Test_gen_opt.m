@@ -41,8 +41,8 @@ TempCorrection_LookUp = [0.34 0.57 0.72 0.84 0.91 1.00 1.02 1.03;
 global BusArray;
 global iteration dt;
 iteration=0;
-nr_bus = 100;
-dt=50;
+nr_bus = 10;
+dt=250;
 x1=zeros(nr_bus,1)';
 tic
 BusArray=randomFill(nr_bus,45*10^3);
@@ -63,8 +63,8 @@ end
 wC=CalcWorstCase(Bm); 
 [~,sizeBigM ] = size(Bm);
 global goal;
-goal = 'Pmin';
-%newBarplot(BusArray,1,Bm)
+goal = 'Nmin';
+newBarplot(BusArray,1,Bm)
 tic;
 opt_t0 = Optimise_t0(@Opt_function,BusArray,dt,arrtime);
 toc;
@@ -81,4 +81,4 @@ save(name, 'BusArray');
 %------------------------------------------%
 
 [Energie_stored,Energie_grid] = CalC_Energie(BusArray(9),0.94,VoltSoc_LookUp)
-Bus = BusArray(9)
+Bus = BusArray(9);

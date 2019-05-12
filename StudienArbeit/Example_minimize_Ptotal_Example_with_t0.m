@@ -44,22 +44,26 @@ iteration=0;
 nr_bus = 10;
 dt=250;
 
-tic
-BusArray = randomFill(nr_bus,45*10^3);
-toc
 arrtime=datetime('00:00:00','InputFormat','HH:mm:SS');
 deptime=datetime('06:00:00','InputFormat','HH:mm:SS');
-for i=1:nr_bus
-   %BusArray(i).CalcP(dt,45000,0,'s');
-   start_time=abs(etime(datevec(arrtime),datevec(BusArray(i).Arrival_time)));
-   BusArray(i).ChargingStart=start_time;
-   BusArray(i).Arrival_seconds = start_time;
-end
+
+
+tic
+BusArray = randomFill(nr_bus,45*10^3, arrtime,deptime);
+toc
+
+
+% for i=1:nr_bus
+%    %BusArray(i).CalcP(dt,45000,0,'s');
+%    start_time=abs(etime(datevec(arrtime),datevec(BusArray(i).Arrival_time)));
+%    BusArray(i).ChargingStart=start_time;
+%    BusArray(i).Arrival_seconds = start_time;
+% end
 
 
 %*****************************Run Optimiser*****************************%
 tic;
-[success] = minimize_nChargers(BusArray,1,arrtime,deptime,1);
+[success] = minimize_total_Power_with_t0(BusArray,42,arrtime,deptime,1);
 toc
 if success 
     disp("successfull")

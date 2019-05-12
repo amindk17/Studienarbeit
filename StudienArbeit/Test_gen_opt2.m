@@ -44,8 +44,8 @@ global goal;
 
 goal = 'Pmin';
 iteration=0;
-nr_bus = 10;
-dt=50;
+nr_bus = 3;
+dt=250;
 x1=zeros(nr_bus,1)';
 tic
 BusArrayP=randomFill(nr_bus,45*10^3);
@@ -63,32 +63,25 @@ for i=1:nr_bus
    BusArrayP(i).Pmin=Pm;
 end
 
-
-
 %*****************************Run Optimiser*****************************%
 %------------------------------------------%
 [Bm,P,~]=FillBigMatrix(BusArrayP,dt,1);
-P
 wC=CalcWorstCase(Bm); 
 [~,sizeBigM ] = size(Bm);
-
-
-
-
 
 tic;
 opt_p = Optimise_P0(@Opt_function_P);
 toc;
 
 
-
 for i=1:nr_bus
      BusArrayP(i).CalcP(dt,opt_p(i),0,'s');
-end  
-[Bm,Pges_max,Nmax]=FillBigMatrix(BusArrayP,dt,1);
+end
+
+[Bm_after,Pges_max,Nmax]=FillBigMatrix(BusArrayP,dt,1);
 Pges_max
-plot_P(Bm,wC,1);
-newBarplot(BusArrayP,1,Bm)
+plot_P(Bm_after,wC,1);
+newBarplot(BusArrayP,1,Bm_after)
 %------------------------------------------%
 
 

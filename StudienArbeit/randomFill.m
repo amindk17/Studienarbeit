@@ -1,4 +1,4 @@
-function BusArray=randomFill(numberOfBus,Pc)
+function BusArray=randomFill(numberOfBus,Pc,arrtime,deptime)
     global Ri_soc_LookUp Imax_LookUp VoltSoc_LookUp TempCorrection_LookUp dt ;
     ids = randperm(400,numberOfBus);
     i=1;
@@ -18,11 +18,11 @@ function BusArray=randomFill(numberOfBus,Pc)
             %---- BatteryData ----% 
             BusArray(i).Battery = aBattery();
             %BusArray(i).Battery.ID=BusArray(i).ID;
-            BusArray(i).Battery.Cmax=randi([80*10^3 100*10^3],1);
+            BusArray(i).Battery.Cmax=randi([500*10^3 750*10^3],1);
             BusArray(i).Battery.SOC=BusArray(i).Arrival_SOC;
             BusArray(i).Battery.endSOC=BusArray(i).Departure_SOC;
             BusArray(i).Battery.Temperatur=25;%randi([0 45],1);
-            BusArray(i).Battery.NumberOfCellsPll=randi([1 4],1);
+            BusArray(i).Battery.NumberOfCellsPll=randi([10 20],1);
             BusArray(i).Battery.NumberOfCellsSerie=randi([80 120],1);
             %---- LookUps ----%
             BusArray(i).Battery.Ri_soc_LookUp=Ri_soc_LookUp;
@@ -30,6 +30,16 @@ function BusArray=randomFill(numberOfBus,Pc)
             BusArray(i).Battery.VoltSoc_LookUp=VoltSoc_LookUp;
             BusArray(i).Battery.TempCorrection_LookUp=TempCorrection_LookUp;
             BusArray(i).CalcP(dt,Pc,0,'s');
+            start_time=abs(etime(datevec(arrtime),datevec(BusArray(i).Arrival_time)));
+            BusArray(i).ChargingStart = start_time;
+            BusArray(i).Arrival_seconds = start_time;
+            
+            all_time = abs(etime(datevec(BusArray(i).Arrival_time),datevec(BusArray(i).Departure_time)));
+            all_time = round(all_time);
+            [Energie_stored, Energie_grid] = CalC_Energie(BusArray(i),0.96,VoltSoc_LookUp);
+            Pm = (Energie_grid*1000*3600)/(all_time) ;
+            BusArray(i).Pmin=Pm;
+            
             FillBigMatrix(BusArray(i),dt,1);
             i=i+1;
         catch

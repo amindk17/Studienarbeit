@@ -5,6 +5,7 @@ classdef aBus < handle
     properties
         %---- Identifier ----%
         ID='0';
+        dt = 0;
         %---- Time Variables ----% 
         Arrival_time=0; 
         Departure_time=0;

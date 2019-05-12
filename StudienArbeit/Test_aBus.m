@@ -53,11 +53,11 @@ MyBus.ChargingTime=0;
 %---- BatteryData ----% 
 MyBus.Battery = aBattery();
 MyBus.Battery.ID=MyBus.ID;
-MyBus.Battery.Cmax=50*10^3;%As
+MyBus.Battery.Cmax=500*10^3;%As
 MyBus.Battery.SOC=MyBus.Arrival_SOC;
 MyBus.Battery.endSOC=MyBus.Departure_SOC;
 MyBus.Battery.Temperatur=25;
-MyBus.Battery.NumberOfCellsPll=3;
+MyBus.Battery.NumberOfCellsPll=10;
 MyBus.Battery.NumberOfCellsSerie=100;
 %---- LookUps ----%
 MyBus.Battery.Ri_soc_LookUp=Ri_soc_LookUp;
@@ -66,7 +66,7 @@ MyBus.Battery.VoltSoc_LookUp=VoltSoc_LookUp;
 MyBus.Battery.TempCorrection_LookUp=TempCorrection_LookUp;
 %---- Simulation ----%
 tic;
-dt=30 ;tunit='s';Pmax=70*10^3;withplot=1;
+dt=30 ;tunit='s';Pmax=50*10^3;withplot=1;
 
 MyBus.CalcP(dt,Pmax,withplot,tunit);
 toc;
