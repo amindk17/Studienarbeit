@@ -4,7 +4,7 @@ classdef aBattery  < handle
     
     properties
       %---- BatteryData ----%  
-      IDB='0';
+      ID;
       Cmax;
       SOC;
       endSOC;
@@ -36,14 +36,15 @@ classdef aBattery  < handle
             P(i) = 0;
             finish = false;
             while ~(finish)  
-                i=i+1;            
-                if i==10^4
+                i=i+1;
+                %disp(i)
+                if i==10^5
                     msg ='too small time Step dt !';
                     error(msg);
                 end
                 [soc,Ic,Pw,finish] = obj.calcNewSoc(obj,soc,obj.endSOC,obj.Cmax,obj.Temperatur,dt,obj.NumberOfCellsPll,obj.NumberOfCellsSerie,...
                 Pmax,obj.Ri_soc_LookUp,obj.VoltSoc_LookUp,obj.Imax_LookUp); 
-                deltaQ = Ic*dt;
+                deltaQ = I*dt;
                 if( logical(exist('deltaQ','var') == 1 ) & (deltaQ > obj.Cmax) )
                     msg ='too Large time Step dt !';
                     error(msg);
@@ -53,10 +54,6 @@ classdef aBattery  < handle
                 P(i) = Pw;
             end
             [unit,un] = obj.ReturnUnit(tunit);
-             try
-                dt=str2num(dt);
-            catch
-            end
             T=i*dt/unit;
             obj.simC=C;
             obj.simI=I;
@@ -70,11 +67,10 @@ classdef aBattery  < handle
         end
         %Function to generate some plots
         function generatePlot(obj,C,Cmaxx,I,P,Pmax,dt,unit,un)
-            name =strcat('Bus ',num2str(obj.IDB));    
+            name =strcat('Bus ',num2str(obj.ID));    
             figure('name',name)
             [~,i]=size(C);
             %____________ Time 
-            
             t= (0:dt:dt*(i-1));
             t=t/unit;
             dt=dt/unit;
@@ -130,14 +126,14 @@ classdef aBattery  < handle
                     C0=(soc/100)*Cmax;
                     Imax = obj.Return_Imax(T,soc,NumberOfCellsPll,Imax_LookUp);
                     It = obj.calcI(obj,soc,Cmax,Ri,obj.Rc,NumberOfCellsSerie,NumberOfCellsPll,Pmax,dt,Imax,VoltSoc_LookUp);
-                    P=-It*U0*NumberOfCellsPll*NumberOfCellsSerie;
+                    P=-It*U0*NumberOfCellsSerie;
                     if ((Pmax~=0)&(abs(P)>abs(Pmax)))
-                        It=Pmax/(U0*NumberOfCellsPll*NumberOfCellsSerie);
+                        It=Pmax/(U0*NumberOfCellsSerie);
                         P=-Pmax;
                     end
                     newSoC = (C0+It*dt)*100/Cmax;
                     if(newSoC <= 90)
-                        soc = newSoC(1);
+                        soc = newSoC;
                     end
                     if   round(soc-endSoc) >= 0 
                         finish=true;
@@ -157,7 +153,7 @@ classdef aBattery  < handle
             Rc=Rc*kr;
             U0 = obj.Return_V(SoC,VoltSoc_LookUp)*NSerie;
             tmpRC = Rc*(1-exp(-deltaT/(Rc*C)));
-            term1= U0/(2*(Ri+tmpRC(1)));
+            term1= U0/(2*(Ri+tmpRC));
             term2=(P/Ri);
             if ( (term1)^2 > (P/Ri))
                 It = U0/(Ri+tmpRC)-sqrt( ( term1 )^2 - term2);
@@ -176,7 +172,7 @@ classdef aBattery  < handle
         function V = Return_V(soc,LookUp)
             soc_vector = LookUp(1,:)';
             v_vector=LookUp(2,:)';
-            if(( (soc < 0) || (soc>100) ))
+            if( (soc < 0) || (soc>100) )
                msg = 'Cell capacity out of Range in ReturnV';
                error(msg)
             end
@@ -235,7 +231,7 @@ classdef aBattery  < handle
                 msg = 'Cell Capacity out of Range';
                 error(msg)
             else
-                Ri=interp2(T_vector,Soc_vector,LookUp',Temperatur,SoC);
+                Ri=interp2(T_vector,Soc_vector,LookUp',Temperatur,SoC)/1000;
             end
         end
         

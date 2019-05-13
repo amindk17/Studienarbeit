@@ -1,4 +1,6 @@
-function newBarplot(BusArray,tunit,BM)
+function newBarplot2(BusArr,tunit,BMnew,BMold)
+global BusArray
+BusArray = BusArr ;
 % Correct the time according to used unit
 if tunit==1%seconds
     correct = 3600;
@@ -9,7 +11,7 @@ else  %hours
 end
 
 % get the number of Bus to Plot
-[~,nr_bus]=size(BusArray);
+[~,nr_bus]=size(BusArr);
 % Prepare some arrays
 Y=zeros(nr_bus,2);
 ticky=strings([1,nr_bus]);
@@ -17,13 +19,13 @@ ticky=strings([1,nr_bus]);
 % fill the matrixs to plot bar
 for i=1:nr_bus
    % data after optimisation
-   Y(i,1) = BusArray(i).ChargingStart/correct; 
-   Y(i,2) = BusArray(i).ChargingTime/correct;
+   Y(i,1) = BusArr(i).ChargingStart/correct; 
+   Y(i,2) = BusArr(i).ChargingTime/correct;
    % data before optimisation
-   Z(i,1) = BusArray(i).Arrival_seconds/correct; 
-   Z(i,2) = BusArray(i).ChargingTime/correct;
+   Z(i,1) = BusArr(i).Arrival_seconds/correct; 
+   Z(i,2) = BusArr(i).ChargingTime/correct;
    % Bus IDs
-   iD=BusArray(i).ID;
+   iD=BusArr(i).ID;
    ticky(1,i)=iD;
 end 
 
@@ -52,7 +54,7 @@ grid on
 for i=1:nr_bus
    a = BusArray(i).ChargingStart/correct;  
    iD=BusArray(i).ID;
-   text(a, i,iD , 'HorizontalAlignment','center', 'VerticalAlignment','bottom','color',[0.2 0.2 0.2])
+   text(double(a), double(i),num2str(iD) , 'HorizontalAlignment','center', 'VerticalAlignment','bottom','color',[0.2 0.2 0.2])
 end 
 
 % if more than 20 bus remove the y Label
@@ -75,8 +77,9 @@ hold off
 % plot number of chargers
 hold on
 yyaxis right
-plot(BM(1,:)/correct,BM(nr_bus+3,:))
+plot(BMold(1,:)/correct,BMold(nr_bus+3,:))
+plot(BMnew(1,:)/correct,BMnew(nr_bus+3,:))
 hold off
 % Add legend
-legend({'','after Optimisation','','before Optimisation','Number Of Chargers after Optimisation'});
+legend({'','after Optimisation','','before Optimisation','Number Of Chargers before','Number Of Chargers after'});
 end

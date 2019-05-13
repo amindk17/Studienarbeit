@@ -1,10 +1,5 @@
 function opt_t0 = Optimise_t0(calcP,BusArray,dt,arrTime)
-    try
-        dt=str2num(dt);
-    catch
-    end
-    [n,m] = size(BusArray);
-    m=max(m,n);
+    [~, m] = size(BusArray);
     LB=zeros(1,m);
     UB=zeros(1,m);
     for i=1:m
@@ -14,11 +9,13 @@ function opt_t0 = Optimise_t0(calcP,BusArray,dt,arrTime)
         UB(1,i) =int32(fix(etime(datevec(bussDepTime),datevec(arrTime))/dt))-BusArray(i).ChargingTime/dt;
     end  
     nvars=m;
-    %LB=[0 0 0];
-    %UB=[m-m1-1 m-m2-1 m-m3-1];
     IntCon=m;
-    opt_t0 = ga(calcP,nvars,[],[],[],[],LB,UB,[],IntCon);
+    %opts = optimoptions(@ga,'PlotFcn',{@gaplotbestf,@gaplotstopping,@gaplotgenealogy});
+    opts = optimoptions(@ga,'PlotFcn',{@gaplotbestf,@gaplotstopping,@gaplotgenealogy}...
+    ,'MaxStallGenerations',10,'FunctionTolerance',10,'MaxGenerations',300,'MaxStallTime',30);
+    opt_t0 = ga(calcP,nvars,[],[],[],[],LB,UB,[],IntCon,opts);
     opt_t0=int64(opt_t0);
-
+    
 end
+
 

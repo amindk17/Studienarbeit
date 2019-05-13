@@ -1,5 +1,6 @@
 function plot_P(Bm,WorstCase,timeformat)
     [n,sz]=size(Bm);
+    n=n-1;
     if(~timeformat)
        t=Bm(1,:)/3600;
     else
@@ -23,15 +24,15 @@ function plot_P(Bm,WorstCase,timeformat)
             datetick('x', 'HH:mm');
         end
     end
-    Legend{1}='P_g_e_s';
+    Legend{1}='P_t_o_t_a_l';
     for i=2:n-1
        Legend{i}=strcat('P_B_u_s_{', num2str(i-1),'}');
     end
     hold off
     legend(Legend);
-    title('P Plot');
+    title('Power Overview After Optimisation');
     xlabel('Time in h');
-    ylabel('Pwer in kW');
+    ylabel('Power in kW');
     subplot(2,1,2);
     maxy=max(WorstCase)*1.1;
     ylim([0 maxy]);
@@ -45,13 +46,15 @@ function plot_P(Bm,WorstCase,timeformat)
     max2=ones(sz)*max(Bm(n,:));
     plot(t,max1/1000,'color','red');
     plot(t,max2/1000,'color','blue');
-    title('P ges');
-    Legend2{1}='P_g_e_s';
-    Legend2{2}='P_w_o_r_s_t';
+    title('Total Power Compare');
+    Legend2{1}='P_t_o_t_a_l after Optimisation';
+    Legend2{2}='P_t_o_t_a_l before Optimisation';
     %Legend2{3}='P_d_i_f_f';
     legend(Legend2);
     xlabel('Time in h');
-    ylabel('Pwer in kW');
+    ylabel('Power in kW');
+    grid on
     hold off
+    
 end
 
