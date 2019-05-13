@@ -12,7 +12,7 @@ function opt_t0 = Optimise_t0(calcP,BusArray,dt,arrTime)
     IntCon=m;
     %opts = optimoptions(@ga,'PlotFcn',{@gaplotbestf,@gaplotstopping,@gaplotgenealogy});
     opts = optimoptions(@ga,'PlotFcn',{@gaplotbestf,@gaplotstopping,@gaplotgenealogy}...
-    ,'MaxStallGenerations',10,'FunctionTolerance',10,'MaxGenerations',300,'MaxStallTime',30);
+    ,'MaxStallGenerations',10,'FunctionTolerance',10,'MaxGenerations',300,'MaxStallTime',180);
     opt_t0 = ga(calcP,nvars,[],[],[],[],LB,UB,[],IntCon,opts);
     opt_t0=int64(opt_t0);
     

@@ -1,8 +1,8 @@
 function [SimulationMatrix,Pges_max, Nmax] = FillBigMatrix(BusArr,dt,worstCase)
 global BusArray;
 BusArray = BusArr ;
-arrtime=datetime('00:00:00','InputFormat','HH:mm:SS');
-deptime=datetime('07:00:00','InputFormat','HH:mm:SS');
+arrtime=datetime('00:00','InputFormat','HH:mm');
+deptime=datetime('06:00','InputFormat','HH:mm');
 timediff =etime(datevec(deptime),datevec(arrtime));
 dtm=fix(timediff/dt)+1;
 [~,sz] =size(BusArr);
@@ -17,12 +17,13 @@ SimulationMatrix=zeros(sz+2,dtm);
             if worstCase
               Bustime =  BusArr(i-1).Arrival_time;
               bussArrTime=datetime(Bustime,'InputFormat','HH:mm');
-              t0 =fix(etime(datevec(bussArrTime),datevec(arrtime))/dt);
+              t0 = fix(etime(datevec(bussArrTime),datevec(arrtime))/dt);
             else
               t0 = BusArr(i-1).ChargingStart;
             end
             SimulationMatrix(i,j+t0)=BusArr(i-1).ChargeVector(j);
             if(j+t0)>dtm
+%                  f = msgbox('not enough t0! Some aBus can not be Charged !','Error');
                  msg ='not enough t0! Some aBus can not be Charged!';
                  error(msg);      
             end    
