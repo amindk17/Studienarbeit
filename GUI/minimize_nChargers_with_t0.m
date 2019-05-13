@@ -18,12 +18,12 @@ Bm_before = Bm;
 opt_t0 = Optimise_t0(@Opt_function,BusArray,dt,arrtime);
 
 
+[Bm_after,Pges_max,Nmax]=FillBigMatrix(BusArray,dt,0);
 
 for i=1:nr_bus
      BusArray(i).ChargingStart=double(opt_t0(i)*dt);
 end 
 
-[Bm_after,Pges_max,Nmax]=FillBigMatrix(BusArray,dt,0);
 
 if withplot 
     plot_P(Bm_after,Power_before,1);

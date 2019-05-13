@@ -1,5 +1,5 @@
 function [SimulationMatrix,Pges_max, Nmax] = FillBigMatrix(BusArr,dt,worstCase)
-global BusArray
+global BusArray;
 BusArray = BusArr ;
 arrtime=datetime('00:00:00','InputFormat','HH:mm:SS');
 deptime=datetime('07:00:00','InputFormat','HH:mm:SS');
@@ -19,7 +19,7 @@ SimulationMatrix=zeros(sz+2,dtm);
               bussArrTime=datetime(Bustime,'InputFormat','HH:mm');
               t0 =fix(etime(datevec(bussArrTime),datevec(arrtime))/dt);
             else
-              t0 = BusArr(i-1).ChargingStart/dt;
+              t0 = BusArr(i-1).ChargingStart;
             end
             SimulationMatrix(i,j+t0)=BusArr(i-1).ChargeVector(j);
             if(j+t0)>dtm

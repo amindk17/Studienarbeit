@@ -52,7 +52,7 @@ grid on
 for i=1:nr_bus
    a = BusArray_after(i).ChargingStart/correct;  
    iD=BusArray_after(i).ID;
-   text(a, i,iD , 'HorizontalAlignment','center', 'VerticalAlignment','bottom','color',[0.2 0.2 0.2])
+   text(a, i,int2str(iD) , 'HorizontalAlignment','center', 'VerticalAlignment','bottom','color',[0.2 0.2 0.2])
 end 
 
 % if more than 20 bus remove the y Label

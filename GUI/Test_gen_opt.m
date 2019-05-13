@@ -45,8 +45,8 @@ nr_bus = 5;
 dt=100;
 x1=zeros(nr_bus,1)';
 BusArray=randomFill(nr_bus);
-arrtime=datetime('00:00:00','InputFormat','HH:mm:SS');
-deptime=datetime('06:00:00','InputFormat','HH:mm:SS');
+arrtime=datetime('00:00','InputFormat','HH:mm');
+deptime=datetime('06:00','InputFormat','HH:mm');
 for i=1:nr_bus
    BusArray(i).CalcP(dt,15000,0,'s');
    start_time=abs(etime(datevec(arrtime),datevec(BusArray(i).Arrival_time)));
@@ -73,9 +73,10 @@ plot_P(Bm,wC,1);
 for i=1:nr_bus
      BusArray(i).ChargingStart=double(opt_t0(i)*dt);
 end  
-newBarplot(BusArray,dt,1)
+newBarplot(BusArray,dt,Bm)
 %------------------------------------------%
-
+name = strcat('BusList',int2str(nr_bus),'.mat');
+save(name, 'BusArray');
 
 
 

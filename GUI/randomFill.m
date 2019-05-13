@@ -35,7 +35,7 @@ function time = returnRandomTime(hmin,hmax)
     h1=sprintf('%02d',randi([hmin hmax],1));
     m1=sprintf('%02d',randi([0 59],1));
     s1='00';
-    time = strcat(h1,':',m1,':',s1);
-    time=datetime(time,'InputFormat','HH:mm:SS');
+    time = strcat(h1,':',m1);
+    %time=datetime(time,'InputFormat','HH:mm');
     
 end

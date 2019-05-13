@@ -3,10 +3,10 @@ function [success] = minimize_total_Power_with_P(BusArr,Pmax_soll,arrtime,deptim
 %   Detailed explanation goes here
 
 %*****************************Generate Test Data*****************************%
-global BusArrayP dt goal VoltSoc_LookUp;
-BusArrayP = BusArr;
+global BusArray dt goal
+BusArray = BusArr;
 goal = 'Pmin';
-[~,nr_bus] =size(BusArrayP);
+[~,nr_bus] =size(BusArray);
 
 % for i=1:nr_bus
 %    start_time=abs(etime(datevec(arrtime),datevec(BusArrayP(i).Arrival_time)));
@@ -20,22 +20,23 @@ goal = 'Pmin';
 % end
 
 %------------------------------------------%
-[Bm,P,~]=FillBigMatrix(BusArrayP,dt,1);
+[Bm,~,~]=FillBigMatrix(BusArray,dt,1);
 Bm_before = Bm;
 BusArray_Before = zeros(2,nr_bus);
 for i=1:nr_bus
-    BusArray_Before(1,i)=BusArrayP(i).ChargingStart;
-    BusArray_Before(2,i)=BusArrayP(i).ChargingTime;
+    BusArray_Before(1,i)=BusArray(i).ChargingStart;
+    BusArray_Before(2,i)=BusArray(i).ChargingTime;
 end
 Power_before=CalcWorstCase(Bm); 
 [~,sizeBigM ] = size(Bm);
 opt_p = Optimise_P0(@Opt_function_P);
 
 for i=1:nr_bus
-     BusArrayP(i).CalcP(dt,opt_p(i),0,'s');
+     BusArray(i).CalcP(dt,opt_p(i),0,'s');
+     BusArray(i).Pmax = int64(opt_p(i));
 end  
-[Bm_after,Pges_max,Nmax]=FillBigMatrix(BusArrayP,dt,1);
-BusArray_After =  repmat(BusArrayP,1);
+[Bm_after,Pges_max,Nmax]=FillBigMatrix(BusArray,dt,1);
+BusArray_After =  repmat(BusArray,1);
 
 if withplot 
     plot_P(Bm_after,Power_before,1);
@@ -48,6 +49,7 @@ if Pmax_soll < abs(Pges_max)/10^3
 else
     success = 1;
 end
+
 end
 
 function b = copyobj(a)

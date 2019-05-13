@@ -8,11 +8,11 @@ BusArray = BusArr;
 goal = 'Pmin';
 [~,nr_bus] =size(BusArray);
 
-for i=1:nr_bus
-   start_time=abs(etime(datevec(arrtime),datevec(BusArray(i).Arrival_time)));
-   BusArray(i).ChargingStart=start_time;
-   BusArray(i).Arrival_seconds = start_time;
-end
+% for i=1:nr_bus
+%    start_time=abs(etime(datevec(arrtime),datevec(BusArray(i).Arrival_time)));
+%    BusArray(i).ChargingStart=start_time;
+%    BusArray(i).Arrival_seconds = start_time;
+% end
 
 
 %*****************************Run Optimiser*****************************%

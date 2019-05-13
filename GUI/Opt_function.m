@@ -28,7 +28,7 @@ function Q=Opt_function(start_t0)
             BusArray(i).ChargingStart=int32(start_t0(i));
         end
         [~,~,N] = FillBigMatrix(BusArray,dt,0);
-        Q=N    
+        Q=N;    
     else
          msg ='Optimisation Goal can only Be: "Pmin" or "Psmooth" ';
          error(msg);

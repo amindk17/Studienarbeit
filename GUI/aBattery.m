@@ -37,18 +37,22 @@ classdef aBattery  < handle
             finish = false;
             while ~(finish)  
                 i=i+1;
-                %disp(i)
-                if i==10^5
-                    msg ='too small time Step dt !';
+               
+                if i==10^3
+                    msg ='too Large or too small time Step dt !';
+                    f = msgbox('too Large or too small time Step dt ! !','Error');
                     error(msg);
                 end
                 [soc,Ic,Pw,finish] = obj.calcNewSoc(obj,soc,obj.endSOC,obj.Cmax,obj.Temperatur,dt,obj.NumberOfCellsPll,obj.NumberOfCellsSerie,...
                 Pmax,obj.Ri_soc_LookUp,obj.VoltSoc_LookUp,obj.Imax_LookUp); 
-                deltaQ = I*dt;
+                deltaQ = Ic*dt;
                 if( logical(exist('deltaQ','var') == 1 ) & (deltaQ > obj.Cmax) )
                     msg ='too Large time Step dt !';
+                    f = msgbox('too Large time Step dt ! !','Error');
                     error(msg);
                 end
+%                 disp(i)
+%                 disp(soc)
                 C(i) = soc;
                 I(i) = Ic;
                 P(i) = Pw;
@@ -67,7 +71,7 @@ classdef aBattery  < handle
         end
         %Function to generate some plots
         function generatePlot(obj,C,Cmaxx,I,P,Pmax,dt,unit,un)
-            name =strcat('Bus ',num2str(obj.ID));    
+            name =strcat('Bus ',num2str(obj.ID),' Simulation');    
             figure('name',name)
             [~,i]=size(C);
             %____________ Time 
