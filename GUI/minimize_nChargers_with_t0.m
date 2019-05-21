@@ -1,4 +1,4 @@
-function [success] = minimize_nChargers_with_t0(BusArr,Nmax_soll,arrtime,deptime,withplot)
+function [Pges_max,Nmax] = minimize_nChargers_with_t0(BusArr,Nmax_soll,arrtime,deptime,withplot)
 %MINIMIZE_NCHARGERS Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -30,10 +30,6 @@ if withplot
     newBarplot2(BusArray,1,Bm_after,Bm_before)
 else
 end
-if Nmax_soll < Nmax
-    success = 0;
-else
-    success = 1;
-end
+
 end
 

@@ -1,4 +1,4 @@
-function [success] = minimize_total_Power_with_P(BusArr,Pmax_soll,arrtime,deptime,withplot)
+function [Pges_max,Nmax] = minimize_total_Power_with_P(BusArr,Pmax_soll,arrtime,deptime,withplot)
 %MINIMIZE_NCHARGERS Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -42,12 +42,6 @@ if withplot
     plot_P(Bm_after,Power_before,1);
     newBarplot3(BusArray_Before,BusArray_After,1,Bm_after,Bm_before)
 else
-end
-
-if Pmax_soll < abs(Pges_max)/10^3
-    success = 0;
-else
-    success = 1;
 end
 
 end

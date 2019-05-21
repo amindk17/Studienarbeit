@@ -16,7 +16,7 @@ function plot_P(Bm,WorstCase,timeformat)
     try
         ylim([0 maxy]);
     end
-    plot(t,Bm(n,:)/1000);
+    plot(t,Bm(n,:)/1000,'LineWidth',2);
     hold on;
     for i = 2:n-1
         plot(t,Bm(i,:)/1000);
